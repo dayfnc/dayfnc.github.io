@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>My App</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, sans-serif;
+      background: #f2f2f7;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+    }
+
+    /* ── App shell ── */
+    .app {
+      background: white;
+      width: 100%;
+      max-width: 430px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    .header {
+      padding: 60px 20px 16px;
+      border-bottom: 1px solid #e5e5ea;
+      background: white;
+    }
+    .header h1 { font-size: 28px; font-weight: 700; color: #1c1c1e; }
+    .header p  { font-size: 14px; color: #8e8e93; margin-top: 2px; }
+
+    /* ── Pages ── */
+    /* Each page is hidden by default; only the active one shows */
+    .page { display: none; flex: 1; flex-direction: column; }
+    .page.active { display: flex; }
+
+    /* ── Shared input styles ── */
+    input[type="text"],
+    input[type="number"],
+    input[type="datetime-local"],
+    select {
+      font-size: 16px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid #d1d1d6;
+      background: #f2f2f7;
+      color: #1c1c1e;
+      outline: none;
+    }
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    select:focus { border-color: #007aff; }
+
+    .btn-primary {
+      padding: 10px 18px;
+      border-radius: 10px;
+      border: none;
+      background: #007aff;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn-primary:active { background: #0062cc; }
+
+    .row { display: flex; gap: 8px; }
+    .status-msg { font-size: 13px; min-height: 18px; text-align: center; }
+
+    /* ════════════════════════════
+       TASKS PAGE
+    ════════════════════════════ */
+    .add-section {
+      padding: 12px 16px;
+      border-bottom: 1px solid #e5e5ea;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .add-section input[type="text"] { flex: 1; }
+
+    .task-list {
+      flex: 1;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 0;
+      color: #8e8e93;
+      font-size: 15px;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 14px;
+      background: #f2f2f7;
+      border-radius: 12px;
+    }
+    .task-item.done { opacity: 0.4; }
+    .task-item.done .task-name { text-decoration: line-through; }
+
+    .task-check {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid #c7c7cc;
+      flex-shrink: 0;
+      cursor: pointer;
+      margin-top: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: white;
+      background: transparent;
+    }
+    .task-check.checked { background: #34c759; border-color: #34c759; }
+
+    .task-info { flex: 1; }
+    .task-name { font-size: 16px; color: #1c1c1e; line-height: 1.4; }
+    .task-time { font-size: 13px; color: #8e8e93; margin-top: 2px; }
+
+    .btn-delete {
+      font-size: 20px;
+      color: #c7c7cc;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0 2px;
+      line-height: 1;
+    }
+    .btn-delete:active { color: #ff3b30; }
+
+    /* ════════════════════════════
+       FINANCE PAGE
+    ════════════════════════════ */
+    .fin-add {
+      padding: 12px 16px;
+      border-bottom: 1px solid #e5e5ea;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .fin-add input[type="text"] { flex: 1; }
+    .fin-add input[type="number"] { width: 110px; }
+    .fin-add select { flex: 1; }
+
+    /* Summary cards */
+    .summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 12px 16px;
+      border-bottom: 1px solid #e5e5ea;
+    }
+    .stat-card {
+      background: #f2f2f7;
+      border-radius: 10px;
+      padding: 10px 14px;
+    }
+    .stat-card.full-width { grid-column: 1 / -1; }
+    .stat-label { font-size: 13px; color: #8e8e93; }
+    .stat-value { font-size: 22px; font-weight: 700; margin-top: 2px; color: #1c1c1e; }
+    .stat-value.income  { color: #34c759; }
+    .stat-value.expense { color: #ff3b30; }
+
+    /* Transaction list */
+    .fin-list {
+      flex: 1;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+    }
+
+    .fin-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      background: #f2f2f7;
+      border-radius: 12px;
+    }
+
+    .fin-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .fin-dot.income  { background: #34c759; }
+    .fin-dot.expense { background: #ff3b30; }
+
+    .fin-info { flex: 1; }
+    .fin-desc { font-size: 15px; color: #1c1c1e; }
+    .fin-cat  { font-size: 13px; color: #8e8e93; margin-top: 1px; }
+
+    .fin-amount { font-size: 15px; font-weight: 600; }
+    .fin-amount.income  { color: #34c759; }
+    .fin-amount.expense { color: #ff3b30; }
+
+    /* ════════════════════════════
+       BOTTOM NAV BAR
+    ════════════════════════════ */
+    .nav-bar {
+      display: flex;
+      border-top: 1px solid #e5e5ea;
+      background: white;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 10px 0 12px;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: #8e8e93;
+      font-size: 11px;
+      font-family: -apple-system, sans-serif;
+    }
+    .nav-item.active { color: #007aff; }
+
+    .nav-icon {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ── Header (shared across pages) ── -->
+  <div class="header">
+    <h1 id="page-title">My Tasks</h1>
+    <p id="page-date"></p>
+  </div>
+
+  <!-- ════════════════════════════
+       TASKS PAGE
+  ════════════════════════════ -->
+  <div id="page-tasks" class="page active">
+
+    <div class="add-section">
+      <div class="row">
+        <input type="text" id="task-input" placeholder="Add a task..." />
+        <button class="btn-primary" onclick="addTask()">Add</button>
+      </div>
+      <input type="datetime-local" id="time-input" />
+      <div class="status-msg" id="task-status" style="color: #34c759;"></div>
+    </div>
+
+    <div class="task-list" id="task-list">
+      <div class="empty-state" id="task-empty">No tasks yet. Add one above!</div>
+    </div>
+
+  </div>
+
+  <!-- ════════════════════════════
+       FINANCE PAGE
+  ════════════════════════════ -->
+  <div id="page-finance" class="page">
+
+    <div class="fin-add">
+      <div class="row">
+        <input type="text" id="fin-desc" placeholder="Description..." />
+        <input type="number" id="fin-amount" placeholder="$0.00" min="0" step="0.01" />
+      </div>
+      <div class="row">
+        <select id="fin-type">
+          <option value="expense">Expense</option>
+          <option value="income">Income</option>
+        </select>
+        <select id="fin-cat">
+          <option value="Food">Food</option>
+          <option value="Transport">Transport</option>
+          <option value="Shopping">Shopping</option>
+          <option value="Bills">Bills</option>
+          <option value="Health">Health</option>
+          <option value="Salary">Salary</option>
+          <option value="Other">Other</option>
+        </select>
+        <button class="btn-primary" onclick="addEntry()">Add</button>
+      </div>
+      <div class="status-msg" id="fin-status" style="color: #34c759;"></div>
+    </div>
+
+    <!-- Summary totals -->
+    <div class="summary">
+      <div class="stat-card">
+        <div class="stat-label">Income</div>
+        <div class="stat-value income" id="total-income">$0.00</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Expenses</div>
+        <div class="stat-value expense" id="total-expenses">$0.00</div>
+      </div>
+      <div class="stat-card full-width">
+        <div class="stat-label">Balance</div>
+        <div class="stat-value" id="total-balance">$0.00</div>
+      </div>
+    </div>
+
+    <div class="fin-list" id="fin-list">
+      <div class="empty-state" id="fin-empty">No entries yet. Add one above!</div>
+    </div>
+
+  </div>
+
+  <!-- ════════════════════════════
+       BOTTOM NAV BAR
+  ════════════════════════════ -->
+  <nav class="nav-bar">
+
+    <button class="nav-item active" id="nav-tasks" onclick="showPage('tasks')">
+      <div class="nav-icon">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="3" y="4"  width="16" height="2" rx="1" fill="currentColor"/>
+          <rect x="3" y="10" width="16" height="2" rx="1" fill="currentColor"/>
+          <rect x="3" y="16" width="10" height="2" rx="1" fill="currentColor"/>
+        </svg>
+      </div>
+      Tasks
+    </button>
+
+    <button class="nav-item" id="nav-finance" onclick="showPage('finance')">
+      <div class="nav-icon">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="11" cy="11" r="9" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M11 6v1.5M11 14.5V16M8.5 9.5c0-1.1.9-2 2.5-2s2.5.9 2.5 2-1.8 2-2.5 2-2.5.9-2.5 2 .9 2 2.5 2 2.5-.9 2.5-2"
+            stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      Finance
+    </button>
+
+  </nav>
+
+</div>
+
+<script>
+  // ── Load saved data ──
+  let tasks   = JSON.parse(localStorage.getItem('myapp-tasks')   || '[]');
+  let entries = JSON.parse(localStorage.getItem('myapp-finance') || '[]');
+
+  // ── Set today's date in the header ──
+  const d = new Date();
+  document.getElementById('page-date').textContent =
+    d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
+  // ── Switch between pages ──
+  function showPage(name) {
+    // Hide all pages, deactivate all nav buttons
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+
+    // Show the chosen page and highlight its nav button
+    document.getElementById('page-' + name).classList.add('active');
+    document.getElementById('nav-' + name).classList.add('active');
+
+    // Update the header title
+    const titles = { tasks: 'My Tasks', finance: 'Finance' };
+    document.getElementById('page-title').textContent = titles[name];
+  }
+
+  // ── Show a quick status message ──
+  function showStatus(id, msg, isError) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.style.color = isError ? '#ff3b30' : '#34c759';
+    setTimeout(() => el.textContent = '', 2500);
+  }
+
+  // ── Save helpers ──
+  function saveTasks()   { localStorage.setItem('myapp-tasks',   JSON.stringify(tasks));   }
+  function saveEntries() { localStorage.setItem('myapp-finance', JSON.stringify(entries)); }
+
+  // ── Format a datetime string ──
+  function formatTime(iso) {
+    return new Date(iso).toLocaleString('en-US', {
+      month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+    });
+  }
+
+  // ════════════════════════════
+  //  TASKS
+  // ════════════════════════════
+
+  function renderTasks() {
+    const list  = document.getElementById('task-list');
+    const empty = document.getElementById('task-empty');
+
+    if (tasks.length === 0) {
+      list.innerHTML = '';
+      list.appendChild(empty);
+      return;
+    }
+
+    list.innerHTML = tasks.map((task, i) => `
+      <div class="task-item ${task.done ? 'done' : ''}">
+        <div class="task-check ${task.done ? 'checked' : ''}" onclick="toggleTask(${i})">
+          ${task.done ? '&#10003;' : ''}
+        </div>
+        <div class="task-info">
+          <div class="task-name">${task.name}</div>
+          ${task.time ? `<div class="task-time">${formatTime(task.time)}</div>` : ''}
+        </div>
+        <button class="btn-delete" onclick="deleteTask(${i})">&#215;</button>
+      </div>
+    `).join('');
+  }
+
+  function addTask() {
+    const nameEl = document.getElementById('task-input');
+    const timeEl = document.getElementById('time-input');
+    const name = nameEl.value.trim();
+
+    if (!name) { showStatus('task-status', 'Please enter a task name.', true); return; }
+
+    tasks.unshift({ name, time: timeEl.value || null, done: false });
+    saveTasks();
+    renderTasks();
+
+    if (timeEl.value) scheduleNotif(tasks[0]);
+
+    nameEl.value = '';
+    timeEl.value = '';
+    showStatus('task-status', 'Task added!');
+  }
+
+  function toggleTask(i) {
+    tasks[i].done = !tasks[i].done;
+    saveTasks();
+    renderTasks();
+  }
+
+  function deleteTask(i) {
+    tasks.splice(i, 1);
+    saveTasks();
+    renderTasks();
+  }
+
+  function scheduleNotif(task) {
+    if (Notification.permission !== 'granted' || !task.time) return;
+    const delay = new Date(task.time) - Date.now();
+    if (delay > 0) {
+      setTimeout(() => new Notification('Task reminder', { body: task.name }), delay);
+    }
+  }
+
+  // ════════════════════════════
+  //  FINANCE
+  // ════════════════════════════
+
+  function renderFinance() {
+    let totalIncome = 0;
+    let totalExpenses = 0;
+
+    entries.forEach(e => {
+      if (e.type === 'income') totalIncome += e.amount;
+      else totalExpenses += e.amount;
+    });
+
+    const balance = totalIncome - totalExpenses;
+
+    document.getElementById('total-income').textContent   = '$' + totalIncome.toFixed(2);
+    document.getElementById('total-expenses').textContent = '$' + totalExpenses.toFixed(2);
+
+    const balEl = document.getElementById('total-balance');
+    balEl.textContent = (balance >= 0 ? '+' : '-') + '$' + Math.abs(balance).toFixed(2);
+    balEl.style.color = balance >= 0 ? '#34c759' : '#ff3b30';
+
+    const list  = document.getElementById('fin-list');
+    const empty = document.getElementById('fin-empty');
+
+    if (entries.length === 0) {
+      list.innerHTML = '';
+      list.appendChild(empty);
+      return;
+    }
+
+    list.innerHTML = entries.map((e, i) => `
+      <div class="fin-item">
+        <div class="fin-dot ${e.type}"></div>
+        <div class="fin-info">
+          <div class="fin-desc">${e.desc}</div>
+          <div class="fin-cat">${e.cat}</div>
+        </div>
+        <div class="fin-amount ${e.type}">
+          ${e.type === 'income' ? '+' : '-'}$${e.amount.toFixed(2)}
+        </div>
+        <button class="btn-delete" onclick="deleteEntry(${i})">&#215;</button>
+      </div>
+    `).join('');
+  }
+
+  function addEntry() {
+    const desc   = document.getElementById('fin-desc').value.trim();
+    const amount = parseFloat(document.getElementById('fin-amount').value);
+    const type   = document.getElementById('fin-type').value;
+    const cat    = document.getElementById('fin-cat').value;
+
+    if (!desc)               { showStatus('fin-status', 'Please enter a description.', true); return; }
+    if (!amount || amount <= 0) { showStatus('fin-status', 'Please enter a valid amount.', true); return; }
+
+    entries.unshift({ desc, amount, type, cat });
+    saveEntries();
+    renderFinance();
+
+    document.getElementById('fin-desc').value   = '';
+    document.getElementById('fin-amount').value = '';
+    showStatus('fin-status', 'Entry added!');
+  }
+
+  function deleteEntry(i) {
+    entries.splice(i, 1);
+    saveEntries();
+    renderFinance();
+  }
+
+  // ── Initial render ──
+  renderTasks();
+  renderFinance();
+</script>
+
+</body>
+</html>
