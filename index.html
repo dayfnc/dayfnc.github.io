@@ -28,7 +28,7 @@
 
     /* ── Header ── */
     .header {
-      padding: 60px 20px 16px;
+      padding: 16px 20px 16px;
       border-bottom: 1px solid #e5e5ea;
       background: white;
     }
@@ -244,11 +244,11 @@
     .cooldown-note { font-size: 12px; color: #c0392b; margin-top: 8px; }
 
     /* ════════════════════════
-       BOTTOM NAV
+       TOP NAV
     ════════════════════════ */
     .nav-bar {
-      display: flex; border-top: 1px solid #e5e5ea; background: white;
-      padding-bottom: env(safe-area-inset-bottom);
+      display: flex; border-bottom: 1px solid #e5e5ea; background: white;
+      padding-top: env(safe-area-inset-top);
     }
     .nav-item {
       flex: 1; display: flex; flex-direction: column; align-items: center;
@@ -262,6 +262,27 @@
 </head>
 <body>
 <div class="app">
+
+  <!-- ════ NAV BAR (TOP) ════ -->
+  <nav class="nav-bar">
+    <button class="nav-item active" id="nav-tasks" onclick="showPage('tasks')">
+      <div class="nav-icon">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <rect x="3" y="4"  width="16" height="2" rx="1" fill="currentColor"/>
+          <rect x="3" y="10" width="16" height="2" rx="1" fill="currentColor"/>
+          <rect x="3" y="16" width="10" height="2" rx="1" fill="currentColor"/>
+        </svg>
+      </div>Tasks
+    </button>
+    <button class="nav-item" id="nav-contracts" onclick="showPage('contracts')">
+      <div class="nav-icon">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <rect x="3" y="3" width="16" height="16" rx="3" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M7 11l2.5 2.5L15 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>Contracts
+    </button>
+  </nav>
 
   <!-- Header -->
   <div class="header">
@@ -284,40 +305,6 @@
     </div>
   </div>
 
-  <!-- ════ FINANCE PAGE ════ -->
-  <div id="page-finance" class="page">
-    <div class="fin-add">
-      <div class="row">
-        <input type="text" id="fin-desc" placeholder="Description..." />
-        <input type="number" id="fin-amount" placeholder="$0.00" min="0" step="0.01" />
-      </div>
-      <div class="row">
-        <select id="fin-type">
-          <option value="expense">Expense</option>
-          <option value="income">Income</option>
-        </select>
-        <select id="fin-cat">
-          <option value="Food">Food</option>
-          <option value="Transport">Transport</option>
-          <option value="Shopping">Shopping</option>
-          <option value="Bills">Bills</option>
-          <option value="Health">Health</option>
-          <option value="Salary">Salary</option>
-          <option value="Other">Other</option>
-        </select>
-        <button class="btn-primary" onclick="addEntry()">Add</button>
-      </div>
-      <div class="status-msg" id="fin-status"></div>
-    </div>
-    <div class="summary">
-      <div class="stat-card"><div class="stat-label">Income</div><div class="stat-value income" id="total-income">$0.00</div></div>
-      <div class="stat-card"><div class="stat-label">Expenses</div><div class="stat-value expense" id="total-expenses">$0.00</div></div>
-      <div class="stat-card full-width"><div class="stat-label">Balance</div><div class="stat-value" id="total-balance">$0.00</div></div>
-    </div>
-    <div class="fin-list" id="fin-list">
-      <div class="empty-state" id="fin-empty">No entries yet. Add one above!</div>
-    </div>
-  </div>
 
   <!-- ════ CONTRACTS PAGE ════ -->
   <div id="page-contracts" class="page">
@@ -370,6 +357,15 @@
         <div class="dur-btn" data-d="14" onclick="selectDur(this)">
           14 days<div class="dur-btn-sub">Stake 400 XP &rarr; Win 1050 XP</div>
         </div>
+        <div class="dur-btn" data-d="custom" onclick="selectDur(this)" style="grid-column:1/-1;">
+          Custom length<div class="dur-btn-sub">Enter your own number of days</div>
+        </div>
+      </div>
+
+      <!-- Custom day count input (shown only when Custom is selected) -->
+      <div id="c-custom-dur-wrap" style="display:none;margin-bottom:8px;">
+        <input type="number" id="c-custom-dur" min="1" max="365" placeholder="Number of days (1–365)"
+               style="width:100%;" oninput="onCustomDurInput()" />
       </div>
 
       <div class="risk-meter">
@@ -392,34 +388,6 @@
 
   </div>
 
-  <!-- ════ NAV BAR ════ -->
-  <nav class="nav-bar">
-    <button class="nav-item active" id="nav-tasks" onclick="showPage('tasks')">
-      <div class="nav-icon">
-        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-          <rect x="3" y="4"  width="16" height="2" rx="1" fill="currentColor"/>
-          <rect x="3" y="10" width="16" height="2" rx="1" fill="currentColor"/>
-          <rect x="3" y="16" width="10" height="2" rx="1" fill="currentColor"/>
-        </svg>
-      </div>Tasks
-    </button>
-    <button class="nav-item" id="nav-finance" onclick="showPage('finance')">
-      <div class="nav-icon">
-        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-          <circle cx="11" cy="11" r="9" stroke="currentColor" stroke-width="1.5"/>
-          <path d="M11 6v1.5M11 14.5V16M8.5 9.5c0-1.1.9-2 2.5-2s2.5.9 2.5 2-1.8 2-2.5 2-2.5.9-2.5 2 .9 2 2.5 2 2.5-.9 2.5-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-      </div>Finance
-    </button>
-    <button class="nav-item" id="nav-contracts" onclick="showPage('contracts')">
-      <div class="nav-icon">
-        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-          <rect x="3" y="3" width="16" height="16" rx="3" stroke="currentColor" stroke-width="1.5"/>
-          <path d="M7 11l2.5 2.5L15 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>Contracts
-    </button>
-  </nav>
 </div>
 
 <script>
@@ -433,7 +401,7 @@
     document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
     document.getElementById('page-' + name).classList.add('active');
     document.getElementById('nav-' + name).classList.add('active');
-    const titles = { tasks: 'My Tasks', finance: 'Finance', contracts: 'Contracts' };
+    const titles = { tasks: 'My Tasks', contracts: 'Contracts' };
     document.getElementById('page-title').textContent = titles[name];
   }
 
@@ -490,48 +458,6 @@
   }
 
   // ══════════════════════════════════
-  //  FINANCE
-  // ══════════════════════════════════
-  let entries = JSON.parse(localStorage.getItem('myapp-finance') || '[]');
-  const saveEntries = () => localStorage.setItem('myapp-finance', JSON.stringify(entries));
-
-  function renderFinance() {
-    let inc = 0, exp = 0;
-    entries.forEach(e => e.type === 'income' ? inc += e.amount : exp += e.amount);
-    const bal = inc - exp;
-    document.getElementById('total-income').textContent   = '$' + inc.toFixed(2);
-    document.getElementById('total-expenses').textContent = '$' + exp.toFixed(2);
-    const b = document.getElementById('total-balance');
-    b.textContent = (bal >= 0 ? '+' : '-') + '$' + Math.abs(bal).toFixed(2);
-    b.style.color = bal >= 0 ? '#34c759' : '#ff3b30';
-    const list = document.getElementById('fin-list'), empty = document.getElementById('fin-empty');
-    if (!entries.length) { list.innerHTML = ''; list.appendChild(empty); return; }
-    list.innerHTML = entries.map((e, i) => `
-      <div class="fin-item">
-        <div class="fin-dot ${e.type}"></div>
-        <div class="fin-info"><div class="fin-desc">${e.desc}</div><div class="fin-cat">${e.cat}</div></div>
-        <div class="fin-amount ${e.type}">${e.type === 'income' ? '+' : '-'}$${e.amount.toFixed(2)}</div>
-        <button class="btn-delete" onclick="deleteEntry(${i})">&#215;</button>
-      </div>`).join('');
-  }
-
-  function addEntry() {
-    const desc = document.getElementById('fin-desc').value.trim();
-    const amount = parseFloat(document.getElementById('fin-amount').value);
-    const type = document.getElementById('fin-type').value;
-    const cat  = document.getElementById('fin-cat').value;
-    if (!desc)          { showStatus('fin-status', 'Enter a description.', true); return; }
-    if (!amount || amount <= 0) { showStatus('fin-status', 'Enter a valid amount.', true); return; }
-    entries.unshift({ desc, amount, type, cat });
-    saveEntries(); renderFinance();
-    document.getElementById('fin-desc').value = '';
-    document.getElementById('fin-amount').value = '';
-    showStatus('fin-status', 'Entry added!');
-  }
-
-  function deleteEntry(i) { entries.splice(i, 1); saveEntries(); renderFinance(); }
-
-  // ══════════════════════════════════
   //  CONTRACTS SYSTEM
   // ══════════════════════════════════
 
@@ -542,6 +468,15 @@
     7:  { stake: 175, reward: 440,  risk: 65 },
     14: { stake: 400, reward: 1050, risk: 90 }
   };
+
+  // Compute stake/reward/risk for any custom day count
+  function calcCustomDuration(days) {
+    // Scale roughly: stake = days * 15, reward = stake * 2.5, risk scales 0–95
+    const stake  = Math.round(days * 15);
+    const reward = Math.round(stake * 2.5);
+    const risk   = Math.min(95, Math.round(20 + days * 2));
+    return { stake, reward, risk };
+  }
 
   // Identity traits the player can earn or lose
   const ALL_TRAITS = ['Reliable', 'Disciplined', 'Consistent', 'Resilient', 'Focused', 'Committed'];
@@ -571,17 +506,36 @@
   function selectDur(el) {
     document.querySelectorAll('.dur-btn').forEach(b => b.classList.remove('selected'));
     el.classList.add('selected');
-    selectedDuration = parseInt(el.dataset.d);
+    selectedDuration = el.dataset.d === 'custom' ? 'custom' : parseInt(el.dataset.d);
+    const wrap = document.getElementById('c-custom-dur-wrap');
+    wrap.style.display = selectedDuration === 'custom' ? 'block' : 'none';
+    updateRiskMeter();
+  }
+
+  function onCustomDurInput() {
     updateRiskMeter();
   }
 
   function updateRiskMeter() {
-    const cfg = DURATIONS[selectedDuration];
+    let cfg;
+    if (selectedDuration === 'custom') {
+      const days = parseInt(document.getElementById('c-custom-dur').value) || 0;
+      if (days < 1) {
+        document.getElementById('c-risk-txt').textContent   = '—';
+        document.getElementById('c-stake-txt').textContent  = '—';
+        document.getElementById('c-reward-txt').textContent = '—';
+        document.getElementById('c-risk-fill').style.width  = '0%';
+        return;
+      }
+      cfg = calcCustomDuration(days);
+    } else {
+      cfg = DURATIONS[selectedDuration];
+    }
     const fill = document.getElementById('c-risk-fill');
     fill.style.width = cfg.risk + '%';
     fill.style.background = cfg.risk < 40 ? '#34c759' : cfg.risk < 70 ? '#ff9500' : '#ff3b30';
-    document.getElementById('c-risk-txt').textContent  = cfg.risk < 40 ? 'Low risk' : cfg.risk < 70 ? 'Medium risk' : 'High risk';
-    document.getElementById('c-stake-txt').textContent = cfg.stake + ' XP';
+    document.getElementById('c-risk-txt').textContent   = cfg.risk < 40 ? 'Low risk' : cfg.risk < 70 ? 'Medium risk' : 'High risk';
+    document.getElementById('c-stake-txt').textContent  = cfg.stake + ' XP';
     document.getElementById('c-reward-txt').textContent = cfg.reward + ' XP';
   }
 
@@ -597,16 +551,28 @@
     if (!habit) { showToast('Choose or enter a habit first.', 'warning'); return; }
     const active = cs.contracts.filter(c => c.status === 'active');
     if (active.length >= 3) { showToast('Max 3 active contracts at once.', 'warning'); return; }
-    const cfg = DURATIONS[selectedDuration];
+
+    let duration, cfg;
+    if (selectedDuration === 'custom') {
+      duration = parseInt(document.getElementById('c-custom-dur').value);
+      if (!duration || duration < 1 || duration > 365) {
+        showToast('Enter a valid custom length (1–365 days).', 'warning'); return;
+      }
+      cfg = calcCustomDuration(duration);
+    } else {
+      duration = selectedDuration;
+      cfg = DURATIONS[duration];
+    }
+
     cs.contracts.unshift({
       id: Date.now(),
       habit,
-      duration: selectedDuration,
+      duration,
       stake: cfg.stake,
       reward: cfg.reward,
-      progress: [],         // array of { date, hit: bool, grace: bool }
+      progress: [],
       startDate: today(),
-      status: 'active',     // active | complete | cooldown | exited
+      status: 'active',
       cooldownUntil: null
     });
     saveContracts();
@@ -804,7 +770,6 @@
   // ── Boot ──
   updateRiskMeter();
   renderTasks();
-  renderFinance();
   renderContracts();
 </script>
 </body>
